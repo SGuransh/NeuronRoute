@@ -1,45 +1,74 @@
-# NeuronRoute: Distributed Machine Learning Inference Platform
+# RFP: Distributed Sentiment Intelligence Platform for Companies
+
+## Project Title
+**NeuronRoute v2: Distributed Sentiment Analysis Dashboard for Companies**
+
+## Background
+Traditional market feedback loops are slow and reactive. In an era where public sentiment evolves in real-time on social platforms like Twitter and Reddit, companies need a proactive, scalable, and resilient solution to monitor and act on public opinion. NeuronRoute aims to fill this gap by leveraging distributed infrastructure and machine learning to deliver high-availability sentiment insights.
 
 ## Problem Statement
-- **High latency** due to centralized inference servers.
-- **Inconsistencies in output** when models are updated.
-- **Lack of resilience** in current system designs.
+- Companies lack real-time visibility into public sentiment surrounding their products.
+- Existing solutions are either centralized, slow, or not domain-customizable.
+- Categorizing and diagnosing issues like "price dissatisfaction" or "design flaws" from user posts remains unstructured and ad hoc.
 
-## Objective & Scope
-- Build a **low-latency system** via geographically distributed replicas.
-- Ensure **model consistency** using a custom implementation of the **Raft consensus algorithm**.
-- Use **Model Context Protocol (MCP)** to route inference requests to the appropriate model (tentative understanding).
-- Learn and apply **Terraform** for infrastructure as code and **auto-scaling containers** (final stage of development).
+## Objectives
+- Build a distributed, real-time ETL and inference platform.
+- Allow companies to subscribe and configure the accounts, topics, or products they want to track.
+- Perform sentiment analysis and reason categorization (e.g., pricing, appearance, reliability).
+- Provide an interactive dashboard with:
+  - Sentiment trends over time.
+  - Top positive/negative posts.
+  - Breakdown of criticism reasons.
+  - Alerts for sentiment dips or spikes.
+- Ensure high-availability and fault tolerance using distributed techniques (e.g., Raft).
 
-## User Stories:
-### Host
-- Should be able to deploy machine learning models to different locations.
-- Update the model (we have to take care of stale outputs here)
-- Delete the model
-- Keep a centralized log of the users
-- Have a dashboard view of the things
+## Scope
 
-### User
-- Should be able to put queries routed to the appropriate model as set by the Host.
+### ETL Pipeline
+- Custom-built scrapers to collect and clean data from Reddit, Twitter, and other public sources.
 
-## Basic Architecture
+### Model Layer
+- Deploy transformer-based models for sentiment and category classification.
 
-### Model Containers
-- ML models are **containerized using Docker**.
-- Deployed across multiple **AWS regions**.
-- Serve predictions via **FastAPI** or similar lightweight backends.
+### Distributed Infra
+- Models replicated across regions.
+- Custom Raft module to sync category model updates.
+- MCP for inference routing based on geo and version.
 
-### Model Controller + Raft
-- A **custom-built Raft module** handles:
-  - Leader election
-  - Log replication for model update propagation
-  - Version synchronization across replicas
+### Frontend
+- Company-facing dashboards (with drill-down by product, time, and issue).
 
-### Load Balancer (Custom)
-- Uses **Model Context Protocol (MCP)** to:
-  - Route inference requests to the **nearest geographical node**
-  - Ensure requests are served by the **correct model version**
-    
-### Infrastructure Layer
-- **Terraform** automates cloud resource provisioning.
-- Deployed on **AWS ECS or EC2** with **auto-scaling groups**.
+### Admin Panel
+- Configure data sources per client.
+- View system usage and logs.
+
+### Auto-scaling Infra
+- Use Terraform to provision ECS/EC2 with auto-scaling and observability (e.g., Grafana).
+
+## User Stories
+
+### As a Company (Client)
+- I want to subscribe to the platform and configure which accounts/products to track.
+- I want to view public sentiment over time.
+- I want to know why people dislike or love my product (price, UX, quality, etc.).
+- I want to be alerted when there's a surge in negative sentiment.
+
+### As a Platform Admin
+- I want to deploy models across regions with Raft-synced updates.
+- I want to log user interactions and sentiment spikes.
+- I want to manage client access and dashboard provisioning.
+- I want to run inference at low latency from the nearest replica node.
+
+## Deliverables
+- Distributed ETL + sentiment inference system.
+- MCP-based load balancer.
+- Raft module for version sync.
+- Terraform-based cloud provisioning.
+- Real-time dashboard for clients.
+
+## Tech Stack (Tentative)
+- **Backend**: Python (FastAPI), Go (Raft module)
+- **Frontend**: React.js + Tailwind
+- **ML**: HuggingFace Transformers (BERT/Sentiment Models), Custom Classifier for Issue Categorization
+- **Infra**: Docker, AWS ECS/EC2, Terraform, Prometheus, Grafana
+- **Data Sources**: Custom scrapers for Reddit, Twitter, and other public data platforms
